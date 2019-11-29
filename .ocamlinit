@@ -1,0 +1,28 @@
+(*
+#load "caml.cma";;
+#load "shadow_stdlib.cma";;
+#load "sexplib0.cma";;
+#load "base.cma";;
+#load "stdio.cma";;
+#load "ocamlcommon.cma";;   (* distributed with compiler *)
+#load "ppx_derivers.cma";;
+#load "migrate_parsetree.cma";;
+#load "ppxlib_ast.cma";;
+#load "stdio.cma";;
+
+#load "ppxlib_print_diff.cma";;
+#load "ppxlib_traverse_builtins.cma";;
+
+#load "ocaml_shadow.cma";; (* distributed with compiler *)
+#load "ppxlib.cma";;
+*)
+#load "graph.cma";;
+#rectypes;;
+#load "GTlib.cma";;
+#load "OCanren.cma";;
+
+#load "camlp5o.cma";;
+#load "pa_ocanren.cmo";;
+
+
+#use "subtype.ml";;
