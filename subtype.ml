@@ -1,14 +1,14 @@
-include struct 
-  open OCanren        
+include struct
+  open OCanren
   type ('name, 'terms) term = Term of 'name * 'terms
 
-  let fmt_term fname fterms fmt (Term (s, xs)) = 
+  let fmt_term fname fterms fmt (Term (s, xs)) =
     Format.fprintf fmt "('%a %a)" fname s fterms xs
-  
-type ground = (string, ground GT.list) term 
-type logic  = (string OCanren.logic, logic OCanren.Std.List.logic) term OCanren.logic 
 
-module F = OCanren.Fmap2(struct 
+type ground = (string, ground GT.list) term
+type logic  = (string OCanren.logic, logic OCanren.Std.List.logic) term OCanren.logic
+
+module F = OCanren.Fmap2(struct
   type  ('a, 'b) t = ('a,'b) term
   let fmap fa fb (Term (a,b)) = Term (fa a, fb b)
 end)
@@ -18,59 +18,60 @@ let w name xs = inj @@ F.distrib @@ Term (name, xs)
 
 let leaf name = w name (Std.List.nil ())
 
-let rec term_reify env t = 
-  F.reify OCanren.reify (OCanren.Std.List.reify term_reify) env t        
-let rec pp_term_logic fmt t = 
-  GT.fmt OCanren.logic 
+let rec term_reify env t =
+  F.reify OCanren.reify (OCanren.Std.List.reify term_reify) env t
+let rec pp_term_logic fmt t =
+  GT.fmt OCanren.logic
     (fmt_term (GT.fmt OCanren.logic (GT.fmt GT.string))
               (GT.fmt Std.List.logic pp_term_logic))
     fmt t
 
-end  
+end
 
 
 (* ****** Relational stuff ******************** *)
 let (!!) x = OCanren.(inj @@ lift x)
 
-open OCanren
-(* open OCanren.Std *)
-
-(* 
+(*
 (define contravariant-subtype (lambda (a b)
-  (conde 
+  (conde
     ( (is-reference b)      (subtype b a)       )
     ( (is-valuetype b) (== b a) )
 )))
 *)
 
-include struct 
-  open OCanren 
+include struct
+  open OCanren
   open OCanren.Std
 
-let rec contravariant_subtype a b = 
-  conde 
+let ibox1 arg = w !!"iboxz" !<arg
+let object3 = w !!"object3" (Std.List.nil())
+let thing2  = w !!"thing2"  (Std.List.nil())
+
+let rec contravariant_subtype a b =
+  conde
     [ (is_reference b) &&& (subtype b a)
-    ; (is_valuetype b) &&& (b ===  a) 
+    ; (is_valuetype b) &&& (b ===  a)
     ]
 
 (*
 (define is-reference (lambda (a)
-  (conde 
-    ((fresh (q) 
+  (conde
+    ((fresh (q)
        (== a `(ibox1 ,q)) ) )
-    
+
     ( (== a 'object3) )
     ( (== a 'thing2) )
     ( (== a a) )
 )))
 *)
 and is_reference a  =
-  conde 
+  conde
     [ fresh (q)
-        (a === w !!"ibox1" q)
-    ; (a === leaf !!"object3")
-    ; (a === leaf !!"thing2")
-    ; success 
+        (a === ibox1 q)
+    ; (a === object3)
+    ; (a === thing2)
+    ; success
     ]
 
 (*
@@ -79,29 +80,29 @@ and is_reference a  =
 and is_valuetype a = failure
 (*
 (define not-contravariant-subtype (lambda (a b)
-  (conde 
+  (conde
     ( (is-reference b) (not-subtype b a))
     ( (is-valuetype b) (=/= b a) )
 )))
 *)
-and not_contravariant_subtype a b = 
-  conde 
+and not_contravariant_subtype a b =
+  conde
     [ (is_reference b) &&& (not_subtype b a)
     ; (is_valuetype b) &&& (b =/= a)
     ]
 (*
 (define not-subtype (lambda (t st)
-  (conde 
-    ( (fresh (q) 
+  (conde
+    ( (fresh (q)
 	(== t `(ibox1 ,q))
-	(== st 'thing2) 
+	(== st 'thing2)
       ))
     ( (fresh (a b)
 	(== t  `(ibox1 ,a))
 	(== st `(ibox1 ,b))
-	(not-contravariant-subtype a b)   
+	(not-contravariant-subtype a b)
 	))
-    ( (fresh (q)     
+    ( (fresh (q)
         (== t  'object3)
 	(== st `(ibox1 ,q))	) )
     ( (== t 'object3) (== st 'thing2) )
@@ -111,8 +112,8 @@ and not_contravariant_subtype a b =
 	(== st `(ibox1 ,a)) ))
 )))
  *)
-and not_subtype t st = 
-  conde 
+and not_subtype t st =
+  conde
     [ fresh (q)
         (t === w !!"ibox1" q)
         (st === leaf !!"thing2")
@@ -134,7 +135,7 @@ and not_subtype t st =
 (define subtype (lambda (t st)
   (conde
     ( (fresh (a)
-        (== st 'object3) 
+        (== st 'object3)
         (== t `(ibox1 ,a)) ))
     ( (fresh (a b)
  	 (== t  `(ibox1 ,a))
@@ -142,16 +143,16 @@ and not_subtype t st =
 	 (contravariant-subtype a b)    ))
     ( (== t 'object3) (== st t) )
     ( (fresh (a)
-        (== t 'thing2) 
-        (== st `(ibox1 ,a))    
+        (== t 'thing2)
+        (== st `(ibox1 ,a))
         (subtype `(ibox1 (ibox1 thing2)) `(ibox1 ,a))  ))
-    ( (== t 'thing2)  (== st 'object3) )     
+    ( (== t 'thing2)  (== st 'object3) )
     ( (== t 'thing2)  (== st t) )
   )
 ))
 *)
-and subtype t st = 
-  conde 
+and subtype t st =
+  conde
     [ fresh (a)
         (st === leaf !!"object3")
         (t  === w !!"ibox1" !<a)
@@ -168,16 +169,14 @@ and subtype t st =
     ; (t === leaf !!"thing2") &&& (st === t)
     ]
 
-end 
+end
 
-let () = 
-  (let open OCanren  in 
-   let open OCanren.Std in   
+let () =
+  (let open OCanren  in
+   let open OCanren.Std in
    run one
      (fun a -> not_subtype a (w !!"ibox1" !<(leaf !!"thing2")))
-     (fun r -> r#reify term_reify) 
+     (fun r -> r#reify term_reify)
   )
-  |> Stream.take ~n:10
+  |> OCanren.Stream.take ~n:10
   |> List.iter (fun l -> Format.printf "%a\n%!" pp_term_logic l)
-  
-
