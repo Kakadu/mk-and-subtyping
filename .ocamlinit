@@ -26,3 +26,5 @@
 
 
 #use "subtype.ml";;
+#quit;;
+
