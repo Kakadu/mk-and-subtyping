@@ -1157,7 +1157,7 @@ let () =
    try
       let answers = with_timeout max_timeout (fun () -> OCanren.Stream.take ~n:1 stream) in
       let span = Mtime_clock.count start in
-      Printf.printf "Time: %f ms\n%!" (Mtime.Span.to_ms span);
+      Printf.printf "Time: %f s\n%!" (Mtime.Span.to_s span);
       match answers with
       | [] -> print_endline "no answers"
       | [(a,b,c,d,e)] ->
