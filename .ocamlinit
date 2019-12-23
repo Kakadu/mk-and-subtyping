@@ -26,5 +26,5 @@
 
 
 #use "subtype.ml";;
+(* #use "106_ocanren_input.ml";; *)
 #quit;;
-

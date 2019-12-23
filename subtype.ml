@@ -1,30 +1,31 @@
 include struct
-  open OCanren
-  type ('name, 'terms) term = Term of 'name * 'terms
+   open OCanren
+   type ('name, 'terms) term = Term of 'name * 'terms
 
-  let fmt_term fname fterms fmt (Term (s, xs)) =
-    Format.fprintf fmt "('%a %a)" fname s fterms xs
+   let fmt_term fname fterms fmt (Term (s, xs)) =
+     Format.fprintf fmt "('%a %a)" fname s fterms xs
 
-type ground = (string, ground GT.list) term
-type logic  = (string OCanren.logic, logic OCanren.Std.List.logic) term OCanren.logic
+   type ground = (string,               ground OCanren.Std.List.ground) term
+   type logic  = (string OCanren.logic, logic  OCanren.Std.List.logic)  term OCanren.logic
+   type tinj = (ground, logic) injected
 
-module F = OCanren.Fmap2(struct
-  type  ('a, 'b) t = ('a,'b) term
-  let fmap fa fb (Term (a,b)) = Term (fa a, fb b)
-end)
+   module F = OCanren.Fmap2(struct
+      type  ('a, 'b) t = ('a,'b) term
+      let fmap fa fb (Term (a,b)) = Term (fa a, fb b)
+   end)
 
-let w name xs = inj @@ F.distrib @@ Term (name, xs)
-(* in [w name xs] xs is obliged to be a list of terms. Is it what is expected? *)
+   let w name xs = inj @@ F.distrib @@ Term (name, xs)
+   (* in [w name xs] xs is obliged to be a list of terms. Is it what is expected? *)
 
-let leaf name = w name (Std.List.nil ())
+   let leaf name = w name (Std.List.nil ())
 
-let rec term_reify env t =
-  F.reify OCanren.reify (OCanren.Std.List.reify term_reify) env t
-let rec pp_term_logic fmt t =
-  GT.fmt OCanren.logic
-    (fmt_term (GT.fmt OCanren.logic (GT.fmt GT.string))
-              (GT.fmt Std.List.logic pp_term_logic))
-    fmt t
+   let rec term_reify env t : logic =
+      F.reify OCanren.reify (OCanren.Std.List.reify term_reify) env t
+   let rec pp_term_logic fmt t =
+      GT.fmt OCanren.logic
+         (fmt_term (GT.fmt OCanren.logic (GT.fmt GT.string))
+                  (GT.fmt Std.List.logic pp_term_logic))
+         fmt t
 
 end
 
@@ -172,7 +173,7 @@ and subtype t st =
 end
 
 let () =
-  let my_reify r = r#reify term_reify in 
+  let my_reify r = r#reify term_reify in
   (let open OCanren  in
    let open OCanren.Std in
    run (succ one)
