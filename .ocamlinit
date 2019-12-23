@@ -23,8 +23,15 @@
 
 #load "camlp5o.cma";;
 #load "pa_ocanren.cmo";;
+#use "topfind";;
+
+#require "mtime.clock.os";;
 
 
-#use "subtype.ml";;
-(* #use "106_ocanren_input.ml";; *)
-#quit;;
+
+#require "threads.vm";;
+
+#use "timeout.ml";;
+
+#use "106_ocanren_input.ml";;
+exit 0;;

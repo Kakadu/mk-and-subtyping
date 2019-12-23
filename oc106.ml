@@ -1141,7 +1141,8 @@ and subtype a b =
     ]
 end
 
-let max_timeout = 10.0
+open Timeout
+let max_timeout = 5.0
 
 let () =
    let my_reify r = r#reify term_reify in
@@ -1163,13 +1164,3 @@ let () =
          Format.printf "First answer: (%a,%a,%a,%a,%a)\n%!" pp_term_logic a pp_term_logic b pp_term_logic c pp_term_logic d pp_term_logic e
       | _ -> failwith "should not happen"
    with Timeout -> Format.printf "Timeout after %f s\n%!" max_timeout
-(*
-  let c = Mtime_clock.counter () in
-  let answers = OCanren.Stream.take ~n:1 stream in
-  let span = Mtime_clock.count c in
-  Printf.printf "Time: %f ms\n%!" (Mtime.Span.to_ms span);
-  match answers with
-  | [] -> print_endline "no answers"
-  | [(a,b,c,d,e)] ->
-    Format.printf "First answer: (%a,%a,%a,%a,%a)\n%!" pp_term_logic a pp_term_logic b pp_term_logic c pp_term_logic d pp_term_logic e
-  | _ -> failwith "should not happen" *)

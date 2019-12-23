@@ -174,11 +174,19 @@ end
 
 let () =
   let my_reify r = r#reify term_reify in
-  (let open OCanren  in
-   let open OCanren.Std in
-   run (succ one)
-     (fun a b -> (a === b) &&& (not_subtype a (w !!"ibox1" !<(leaf !!"thing2"))) )
-     (fun r r2 -> (my_reify r, my_reify r2) )
-  )
-  |> OCanren.Stream.take ~n:1
-  |> List.iter (fun (l,m) -> Format.printf "(%a,%a)\n%!" pp_term_logic l pp_term_logic m)
+  let stream =
+    let open OCanren  in
+    let open OCanren.Std in
+    run (succ one)
+      (fun a b -> (a === b) &&& (not_subtype a (w !!"ibox1" !<(leaf !!"thing2"))) )
+      (fun r r2 -> (my_reify r, my_reify r2) )
+  in
+  let c = Mtime_clock.counter () in
+  let answers = OCanren.Stream.take ~n:1 in
+  let span = Mtime_clock.count c () in
+  Printf.printf "Time: %f ms\n%!" (Mtime.Span.to_ms span);
+  match answers with
+  | [] -> print_endline "no answers"
+  | [(l,m)] ->
+    Format.printf "First answer: (%a,%a)\n%!" pp_term_logic l pp_term_logic m
+  | _ -> failwith "should not happen"
