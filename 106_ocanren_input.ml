@@ -9,7 +9,7 @@ include struct
    type logic  = (string OCanren.logic, logic  OCanren.Std.List.logic)  term OCanren.logic
    type tinj = (ground, logic) injected
 
-   module F = OCanren.Fmap2(struct
+   module F = OCanren.Fmap2(struct 
       type  ('a, 'b) t = ('a,'b) term
       let fmap fa fb (Term (a,b)) = Term (fa a, fb b)
    end)

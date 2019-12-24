@@ -33,16 +33,28 @@ include struct
 
 end
 
+let () =
+  Format.pp_set_margin Format.std_formatter 140;
+  Format.pp_set_max_indent Format.std_formatter 2000
+
+let pp_reify_term fmt rr = Format.fprintf fmt "%a" pp_term_logic (rr#reify term_reify)
+
 let hack var msg =
   let open OCanren.Std in
-  trace1 msg var (fun fmt rr -> Format.fprintf fmt "%a" pp_term_logic (rr#reify term_reify))
+  trace1 msg var pp_reify_term
 
 let hackboth msg v1 v2 =
   let open OCanren.Std in
-  trace2 msg
-    v1 v2
-    (fun fmt rr -> Format.fprintf fmt "%a" pp_term_logic (rr#reify term_reify))
-    (fun fmt rr -> Format.fprintf fmt "%a" pp_term_logic (rr#reify term_reify))
+  trace2 msg v1 v2 pp_reify_term pp_reify_term
+
+let term_check2 msg a b =
+  let open OCanren.Std in
+  let pp fmt x = match Obj.magic x with
+  | x ->
+    (* Format.fprintf fmt "{here} " *)
+    Format.fprintf fmt "%a" pp_reify_term x
+  in
+  term_check pp "check: subtype {a,b}" (Obj.repr a) (Obj.repr b)
 
 (* ****** Relational stuff ******************** *)
 let (!!) x = OCanren.(inj @@ lift x)
@@ -101,7 +113,8 @@ and not_subtype a b =
     ; (a === object33554493) &&& (b === valuetype33554777)
     ]
 and subtype a b =
-  (hackboth "subtype a b" a b) &&&
+  (hackboth "\nsubtype a b" a b) &&&
+  (term_check2 "check: subtype {a,b}" a b) &&&
   conde
     [ fresh (c d)
        (a === ia33554436 c)
@@ -114,7 +127,19 @@ and subtype a b =
     ; (a === valuetype33554777) &&& (b === object33554493)
     ; (a === object33554493) &&& (b === object33554493)
     ]
+
+let rec simple_test a b =
+  (hackboth "\nsimple_test a b" a b) &&&
+  (term_check2 "check: simple_test {a,b}" a b) &&&
+  conde
+    [ fresh (c d)
+       (c === ia33554436 a)
+       (d === ia33554436 b)
+       (simple_test c d)
+    ]
 end
+
+
 
 open Timeout
 let max_timeout = 20.0
@@ -124,7 +149,9 @@ let () =
       let open OCanren  in
       let open OCanren.Std in
       run (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ one))))))))))
-      (fun a b c d e f g h i j k -> (subtype a (ia33554436 a))
+      (fun a b c d e f g h i j k ->
+        (simple_test a (ia33554436 a))
+        (* (subtype a (ia33554436 a)) *)
         (* &&& (subtype b (ia33554436 a)) &&& (subtype valuetype33554777 c) &&& (subtype d (ia33554436 d)) &&& (subtype e (ia33554436 d)) &&& (subtype f a) &&& (subtype g a) &&& (subtype f h) &&& (subtype g h) &&& (subtype c h) &&& (subtype i h) &&& (subtype j h) &&& (subtype k h) &&& (subtype a (ia33554436 d)) &&& (subtype d (ia33554436 a)) &&& (subtype a (ia33554436 d)) &&& (subtype d (ia33554436 a)) &&& (default_constructor c) &&& (is_reference j) *)
       )
       (fun a b c d e f g h i j k -> (my_reify a,my_reify b,my_reify c,my_reify d,my_reify e,my_reify f,my_reify g,my_reify h,my_reify i,my_reify j,my_reify k))
