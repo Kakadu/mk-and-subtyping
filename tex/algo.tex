@@ -1,0 +1,71 @@
+\documentclass[a5paper,12pt]{article}
+\usepackage[cache=true]{minted}
+\usepackage{polyglossia}
+\setmainlanguage{russian}
+\let\cyrillicfonttt\monofamily
+\usepackage{comment}
+\usepackage{stmaryrd}
+
+\usepackage[ left=1cm
+           , right=2cm
+           , top=1cm
+           , bottom=1.5cm
+           ]{geometry}
+\usepackage{amssymb,amsmath,amsthm,amsfonts} 
+
+\usepackage{fontspec}
+% \DeclareMathSizes{22}{30}{24}{20}
+
+%\usefonttheme{professionalfonts}
+\defaultfontfeatures{Ligatures={TeX}}
+%\setmainfont[Scale=1.5]{Times New Roman}
+%\setmainfont{Latin Modern Roman}
+\setmainfont [ Scale=1]{CMU Serif Roman}
+\setsansfont[Scale=1]{CMU Sans Serif}
+
+%\setmonofont[ BoldFont=lmmonolt10-bold.otf
+%			, ItalicFont=lmmono10-italic.otf
+%			, BoldItalicFont=lmmonoproplt10-boldoblique.otf
+%			, Scale=1.5
+%]{lmmono9-regular.otf}
+%\setmonofont[Scale=1.5]{CMU Typewriter Text}
+\setmonofont{CMU Typewriter Text}
+
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}[Scale=1]
+\newcommand*{\arr}{\ensuremath{\rightarrow}}
+
+% Doesn't work?
+\renewcommand{\epsilon}{\ensuremath{\varepsilon}}
+%\renewcommand{\sigma}{\ensuremath{\varsigma}}
+\newcommand{\inbr}[1]{\left<{#1}\right>}
+\newcommand{\ruleno}[1]{\mbox{[\textsc{#1}]}}
+\newcommand{\bigslant}[2]{{\raisebox{.2em}{$#1$}\left/\raisebox{-.2em}{$#2$}\right.}}
+\newcommand{\sem}[1]{\llbracket #1 \rrbracket}
+\newcommand{\subtypeof}[2]{ #1\ \text{<:}\ #2}
+\begin{document}
+
+
+\section{1}
+
+\section{2}
+
+\section{3}
+Дано:
+
+\begin{align*}
+  \subtypeof{o}{o}&\\
+  v <: v&\\
+    v <: o& \\
+    f\langle+x\rangle& \\
+        f\langle x\rangle <: o& 
+\end{align*}
+
+Запрос
+\begin{minted}{ocaml}
+(subtype a (ia d)) &&& (subtype d (ia a))
+\end{minted}
+
+Вообще алгоритм имени мисонижника делает поиск в ширину и переваривает конъюнкты в ширины, причем количество конъюнктов может увеличиваться. Далее, имеющийся фронт конъюнктов можно анализировать различными способами и просекать альфа-эквивалентность какую-нибудь, запускать гомеоморфные вложения и т.п.
+
+\end{document}
